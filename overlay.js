@@ -5,6 +5,9 @@
   const existing = document.getElementById(ID);
   if (existing) {
     existing.dispatchEvent(new Event("tabscope-close"));
+    // A frame left over from before an extension reload may have no live
+    // listener to close it, so remove it here too.
+    existing.remove();
     return;
   }
 

@@ -4,6 +4,7 @@
 const MODE = new URLSearchParams(location.search).get("mode") === "overlay" ? "overlay" : "popup";
 const MAX_RENDERED = 300;
 const SELF_PREFIX = chrome.runtime.getURL("");
+const FAVICON_BASE = chrome.runtime.getURL("/_favicon/");
 
 const $query = document.getElementById("query");
 const $results = document.getElementById("results");
@@ -24,8 +25,16 @@ function closePalette() {
   else window.close();
 }
 
+// Reloading the extension cuts a still-open overlay off from the chrome.*
+// APIs (they throw "Extension context invalidated"), so it just closes.
+function extensionAlive() {
+  if (chrome.runtime?.id) return true;
+  closePalette();
+  return false;
+}
+
 function faviconUrl(pageUrl, size) {
-  const url = new URL(chrome.runtime.getURL("/_favicon/"));
+  const url = new URL(FAVICON_BASE);
   url.searchParams.set("pageUrl", pageUrl);
   url.searchParams.set("size", String(size));
   return url.href;
@@ -237,6 +246,7 @@ async function closeSelectedTab() {
 }
 
 document.addEventListener("keydown", (e) => {
+  if (!extensionAlive()) return;
   const ctrl = e.ctrlKey && !e.metaKey && !e.altKey;
   let handled = true;
   if (e.key === "Escape" || (ctrl && e.key === "c")) closePalette();
@@ -254,9 +264,10 @@ document.addEventListener("keydown", (e) => {
   if (handled) e.preventDefault();
 });
 
-$query.addEventListener("input", update);
+$query.addEventListener("input", () => extensionAlive() && update());
 
 $results.addEventListener("mousemove", (e) => {
+  if (!extensionAlive()) return;
   const li = e.target.closest("li");
   if (li && Number(li.dataset.i) !== selected) {
     selected = Number(li.dataset.i);
@@ -264,11 +275,11 @@ $results.addEventListener("mousemove", (e) => {
   }
 });
 $results.addEventListener("click", (e) => {
-  if (e.target.closest("li")) activateSelected();
+  if (e.target.closest("li") && extensionAlive()) activateSelected();
 });
 
 document.getElementById("backdrop").addEventListener("mousedown", closePalette);
-document.getElementById("settings").addEventListener("click", openSettings);
+document.getElementById("settings").addEventListener("click", () => extensionAlive() && openSettings());
 
 // Keep typing focus in the prompt no matter where you click.
 document.addEventListener("mousedown", (e) => {
