@@ -68,9 +68,9 @@ The settings page has a live preview against your open tabs, showing each match'
 
 `version` in `manifest.json` is the release version. Tags are `v` plus that version. Releases are cut from a clean `main` and need `gh` logged in.
 
-1. `./release.sh prepare 1.2.0` sets the version, commits, tags `v1.2.0` and builds `dist/tabscope-1.2.0.zip` and `dist/tabscope-1.2.0-unsigned.xpi`. Nothing is pushed.
+1. `./release.sh prepare` bumps the patch version (`prepare minor` or `prepare major` for the others), commits, tags it and builds `dist/tabscope-<version>.zip` and `dist/tabscope-<version>-unsigned.xpi`. Nothing is pushed.
 2. Upload the unsigned xpi to addons.mozilla.org and download the signed copy.
-3. `./release.sh publish 1.2.0 <signed.xpi>` checks that the xpi is signed and has the right version, pushes `main` and the tag, and creates the GitHub release with the zip and the signed xpi.
+3. `./release.sh publish <signed.xpi>` releases the version tagged at `HEAD`. It checks that the xpi is signed and has the right version, pushes `main` and the tag, and creates the GitHub release with the zip and the signed xpi.
 
 ## Credits
 
