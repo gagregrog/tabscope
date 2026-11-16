@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Tabscope",
+  "version": "1.0.0",
+  "description": "Fuzzy-find your open tabs by title or URL, telescope.nvim style.",
+  "permissions": ["tabs", "scripting", "activeTab", "favicon"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Tabscope",
+    "default_popup": "palette.html"
+  },
+  "commands": {
+    "open-tabscope": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+F",
+        "mac": "Command+Shift+F"
+      },
+      "description": "Open the tab finder"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["palette.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

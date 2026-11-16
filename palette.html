@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Tabscope</title>
+    <link rel="stylesheet" href="palette.css" />
+  </head>
+  <body>
+    <div id="backdrop"></div>
+    <main id="picker">
+      <div class="left">
+        <fieldset class="panel prompt">
+          <legend>Find Tabs</legend>
+          <span class="prefix">&gt;</span>
+          <input id="query" autocomplete="off" spellcheck="false" autofocus />
+          <span id="count"></span>
+        </fieldset>
+        <fieldset class="panel results">
+          <legend>Results</legend>
+          <ul id="results"></ul>
+        </fieldset>
+      </div>
+      <fieldset class="panel preview">
+        <legend>Preview</legend>
+        <div id="preview"></div>
+        <div class="hint">
+          ⏎ open · ↑↓ ^n/^p ^j/^k move · ^d close tab · ^u clear · esc quit
+        </div>
+      </fieldset>
+    </main>
+    <script src="fuzzy.js"></script>
+    <script src="palette.js"></script>
+  </body>
+</html>
