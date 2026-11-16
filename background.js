@@ -170,18 +170,44 @@ chrome.commands.onCommand.addListener((command, tab) => {
   else if (command === "walk-forward") walk(-1);
 });
 
-// The palette asks us to switch tabs so the switch finishes even if the
-// palette's frame is torn down mid-way (e.g. the action popup closing).
+async function listTabs() {
+  const [tabs, [active], mru] = await Promise.all([
+    chrome.tabs.query({}),
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }),
+    serial(async () => (await getState()).mru),
+  ]);
+  return { tabs, activeId: active?.id ?? null, mru };
+}
+
+// Returns whether the tab is gone. Zen keeps pinned tabs (including tabs in
+// folders) open when asked to close them.
+async function closeTab(tabId) {
+  await chrome.tabs.remove(tabId);
+  try {
+    await chrome.tabs.get(tabId);
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+// The palette does all tab work through these messages. Firefox gives an
+// extension frame inside a web page only content-script APIs, so the overlay
+// has no chrome.tabs. A switch sent here also finishes if the palette's frame
+// is torn down mid-way (e.g. the action popup closing).
+const handlers = {
+  "list-tabs": () => listTabs(),
+  activate: (msg) => focusTab(msg.tabId).then(() => true),
+  "close-tab": (msg) => closeTab(msg.tabId),
+  "open-options": () => chrome.runtime.openOptionsPage(),
+};
+
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-  if (msg?.type === "activate") {
-    focusTab(msg.tabId).then(
-      () => sendResponse(true),
-      () => sendResponse(false),
-    );
-    return true;
-  }
-  if (msg?.type === "get-mru") {
-    serial(async () => (await getState()).mru).then(sendResponse, () => sendResponse([]));
-    return true;
-  }
+  const handler = handlers[msg?.type];
+  if (!handler) return;
+  handler(msg).then(
+    (result) => sendResponse({ ok: true, result }),
+    (err) => sendResponse({ ok: false, error: String(err?.message ?? err) }),
+  );
+  return true;
 });

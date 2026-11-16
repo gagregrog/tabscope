@@ -110,7 +110,11 @@ document.querySelectorAll('input[name="sortBy"]').forEach((radio) =>
   radio.addEventListener("change", (e) => save({ sortBy: e.target.value })),
 );
 $tryQuery.addEventListener("input", renderTry);
-$("editShortcuts").addEventListener("click", () => chrome.tabs.create({ url: "chrome://extensions/shortcuts" }));
+$("editShortcuts").addEventListener("click", () => {
+  // Firefox only opens its shortcut page through this API.
+  if (chrome.commands.openShortcutSettings) chrome.commands.openShortcutSettings();
+  else chrome.tabs.create({ url: "chrome://extensions/shortcuts" });
+});
 // Shortcut changes happen on another page; refresh when we come back.
 window.addEventListener("focus", renderShortcuts);
 

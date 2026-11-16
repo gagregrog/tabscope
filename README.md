@@ -1,6 +1,6 @@
 # Tabscope
 
-Fuzzy-find your open tabs by title or URL, in a telescope.nvim-style picker. Also lets you jump back to your previous tab and walk back and forward through recently used tabs. Works in Brave, Chrome and other Chromium browsers.
+Fuzzy-find your open tabs by title or URL, in a telescope.nvim-style picker. Also lets you jump back to your previous tab and walk back and forward through recently used tabs. Works in Brave, Chrome and other Chromium browsers, and in Firefox 140+.
 
 ![The Tabscope finder: a search box with the query "tele", a list of matching tabs with the matched letters highlighted, and a preview of the selected tab](docs/finder.png)
 
@@ -9,6 +9,14 @@ Fuzzy-find your open tabs by title or URL, in a telescope.nvim-style picker. Als
 1. Open `brave://extensions` (or `chrome://extensions`) and turn on **Developer mode**.
 2. Click **Load unpacked** and pick this folder.
 3. The default hotkeys below are set on install. Change them at `brave://extensions/shortcuts`.
+
+### Firefox
+
+1. Run `./build-ff.sh` (needs Python 3). It writes `tabscope.xpi`.
+2. Open `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on** and pick `tabscope.xpi`.
+3. Firefox keeps the add-on until it restarts. Change hotkeys at `about:addons` → gear menu → **Manage Extension Shortcuts**.
+
+The build takes `manifest.json`, applies the overrides in `firefox-manifest.json` (an event-page background and the Gecko add-on ID) and drops the `favicon` permission. Firefox has no favicon endpoint, so the picker shows the icon each tab reports. A permanent install needs a build signed through addons.mozilla.org.
 
 ## Hotkeys
 

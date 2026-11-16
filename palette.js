@@ -4,7 +4,11 @@
 const MODE = new URLSearchParams(location.search).get("mode") === "overlay" ? "overlay" : "popup";
 const MAX_RENDERED = 300;
 const SELF_PREFIX = chrome.runtime.getURL("");
-const FAVICON_BASE = chrome.runtime.getURL("/_favicon/");
+// Firefox has no _favicon endpoint, so its build drops the permission and
+// the picker uses the icon URL the tab reports.
+const FAVICON_BASE = chrome.runtime.getManifest().permissions?.includes("favicon")
+  ? chrome.runtime.getURL("/_favicon/")
+  : null;
 
 const $query = document.getElementById("query");
 const $results = document.getElementById("results");
@@ -33,22 +37,28 @@ function extensionAlive() {
   return false;
 }
 
-function faviconUrl(pageUrl, size) {
+function faviconUrl(tab, size) {
+  if (!FAVICON_BASE) {
+    // Firefox's own pages report chrome:// icons that extensions can't load.
+    const icon = tab.favIconUrl;
+    return icon && !icon.startsWith("chrome:") ? icon : "icons/icon32.png";
+  }
   const url = new URL(FAVICON_BASE);
-  url.searchParams.set("pageUrl", pageUrl);
+  url.searchParams.set("pageUrl", tab.url || "");
   url.searchParams.set("size", String(size));
   return url.href;
 }
 
+async function send(msg) {
+  const reply = await chrome.runtime.sendMessage(msg);
+  if (!reply?.ok) throw new Error(reply?.error ?? "No reply from the background script");
+  return reply.result;
+}
+
 async function load() {
-  const [all, [active], mru, loaded] = await Promise.all([
-    chrome.tabs.query({}),
-    chrome.tabs.query({ active: true, lastFocusedWindow: true }),
-    chrome.runtime.sendMessage({ type: "get-mru" }).catch(() => []),
-    loadSettings(),
-  ]);
+  const [{ tabs: all, activeId, mru }, loaded] = await Promise.all([send({ type: "list-tabs" }), loadSettings()]);
   settings = loaded;
-  currentTabId = active?.id ?? null;
+  currentTabId = activeId;
   for (const tab of all) {
     if (!windowNumbers.has(tab.windowId)) windowNumbers.set(tab.windowId, windowNumbers.size + 1);
   }
@@ -120,7 +130,7 @@ function render() {
 
     const icon = document.createElement("img");
     icon.className = "icon";
-    icon.src = faviconUrl(item.entry.tab.url || "", 32);
+    icon.src = faviconUrl(item.entry.tab, 32);
 
     const title = document.createElement("span");
     title.className = "title";
@@ -170,7 +180,7 @@ function renderPreview(item) {
   const head = document.createElement("div");
   head.className = "head";
   const icon = document.createElement("img");
-  icon.src = faviconUrl(tab.url || "", 64);
+  icon.src = faviconUrl(tab, 64);
   const h2 = document.createElement("h2");
   h2.append(highlighted(item.entry.title, item.titlePos));
   head.append(icon, h2);
@@ -225,12 +235,12 @@ async function activateSelected() {
   const item = items[selected];
   if (!item) return;
   const { id, windowId } = item.entry.tab;
-  await chrome.runtime.sendMessage({ type: "activate", tabId: id, windowId });
+  await send({ type: "activate", tabId: id, windowId }).catch(() => {});
   closePalette();
 }
 
 function openSettings() {
-  chrome.runtime.openOptionsPage();
+  send({ type: "open-options" });
   closePalette();
 }
 
@@ -238,7 +248,7 @@ async function closeSelectedTab() {
   const item = items[selected];
   if (!item) return;
   const { id } = item.entry.tab;
-  await chrome.tabs.remove(id);
+  if (!(await send({ type: "close-tab", tabId: id }))) return;
   entries = entries.filter((e) => e.tab.id !== id);
   items.splice(selected, 1);
   selected = Math.max(0, Math.min(selected, items.length - 1));
@@ -289,4 +299,9 @@ window.addEventListener("focus", () => $query.focus());
 
 $query.focus();
 renderPreview(null);
-load();
+load().catch((err) => {
+  const msg = document.createElement("div");
+  msg.className = "empty";
+  msg.textContent = `Couldn't load tabs: ${err?.message ?? err}`;
+  $preview.replaceChildren(msg);
+});
