@@ -2,6 +2,8 @@
 
 Fuzzy-find your open tabs by title or URL, in a telescope.nvim-style picker. Also lets you jump back to your previous tab and walk back and forward through recently used tabs. Works in Brave, Chrome and other Chromium browsers.
 
+![The Tabscope finder: a search box with the query "tele", a list of matching tabs with the matched letters highlighted, and a preview of the selected tab](docs/finder.png)
+
 ## Install
 
 1. Open `brave://extensions` (or `chrome://extensions`) and turn on **Developer mode**.
@@ -53,6 +55,10 @@ The settings page has a live preview against your open tabs, showing each match'
 - On pages that extensions can't script (`brave://`, the new tab page, the Web Store, PDFs), the picker opens as the toolbar popup instead.
 - `background.js` keeps the most-recently-used tab list across all windows. It drives the finder's ordering, the swap and the walk.
 - `fuzzy.js` is an fzf-style scorer. It gives bonuses for matches at word boundaries, at camelCase humps and in consecutive runs, and penalties for gaps.
+
+## Credits
+
+Inspired by [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) for the picker and [fzf](https://github.com/junegunn/fzf) for the matching.
 
 ## License
 
