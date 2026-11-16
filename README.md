@@ -6,16 +6,18 @@ Fuzzy-find your open tabs by title or URL, in a telescope.nvim-style picker. Als
 
 1. Open `brave://extensions` (or `chrome://extensions`) and turn on **Developer mode**.
 2. Click **Load unpacked** and pick this folder.
-3. Check the hotkeys at `brave://extensions/shortcuts`. The browser only assigns the defaults below on a fresh install, and skips any that clash with another shortcut.
+3. The default hotkeys below are set on install. Change them at `brave://extensions/shortcuts`.
 
 ## Hotkeys
 
 | Default (macOS) | Default (Windows/Linux) | Action |
 | --- | --- | --- |
-| `⌘⇧F` | `Ctrl+Shift+F` | Open the tab finder |
-| `⌘⇧P` | `Ctrl+Shift+P` | Swap to the previous tab (press again to swap back) |
+| `⌃⇧F` | `Alt+Shift+F` | Open the tab finder |
+| `⌃⇧P` | `Alt+Shift+P` | Swap to the previous tab (press again to swap back) |
 | `⌃H` | `Alt+Shift+H` | Walk back through recently used tabs |
 | `⌃L` | `Alt+Shift+L` | Walk forward again |
+
+The defaults avoid every shortcut in Brave's menus, because the browser silently skips a default that clashes with one of its own shortcuts. You can still set a clashing key such as `⌘⇧F` by hand on the shortcuts page, and it then overrides the browser's.
 
 The swap works like vim's alternate file (`Ctrl-^`), and the walk like its jumplist, on vim's left/right keys. Walking back steps through your tabs in most-recently-used order without reshuffling that order, so repeated presses keep going further back. Opening a tab any other way ends the walk, and the tab you stopped on counts as visited.
 
