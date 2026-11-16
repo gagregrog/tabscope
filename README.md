@@ -12,7 +12,7 @@ Fuzzy-find your open tabs by title or URL, in a telescope.nvim-style picker. Als
 
 ### Firefox
 
-1. Run `./build-ff.sh` (needs Python 3). It writes `tabscope.xpi`.
+1. Run `./build.sh firefox` (needs Python 3). It writes `tabscope.xpi`.
 2. Open `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on** and pick `tabscope.xpi`.
 3. Firefox keeps the add-on until it restarts. Change hotkeys at `about:addons` → gear menu → **Manage Extension Shortcuts**.
 
@@ -63,6 +63,14 @@ The settings page has a live preview against your open tabs, showing each match'
 - On pages that extensions can't script (`brave://`, the new tab page, the Web Store, PDFs), the picker opens as the toolbar popup instead.
 - `background.js` keeps the most-recently-used tab list across all windows. It drives the finder's ordering, the swap and the walk.
 - `fuzzy.js` is an fzf-style scorer. It gives bonuses for matches at word boundaries, at camelCase humps and in consecutive runs, and penalties for gaps.
+
+## Releasing
+
+`version` in `manifest.json` is the release version. Tags are `v` plus that version. Releases are cut from a clean `main` and need `gh` logged in.
+
+1. `./release.sh prepare 1.2.0` sets the version, commits, tags `v1.2.0` and builds `dist/tabscope-1.2.0.zip` and `dist/tabscope-1.2.0-unsigned.xpi`. Nothing is pushed.
+2. Upload the unsigned xpi to addons.mozilla.org and download the signed copy.
+3. `./release.sh publish 1.2.0 <signed.xpi>` checks that the xpi is signed and has the right version, pushes `main` and the tag, and creates the GitHub release with the zip and the signed xpi.
 
 ## Credits
 
