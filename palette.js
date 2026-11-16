@@ -10,10 +10,11 @@ const $results = document.getElementById("results");
 const $preview = document.getElementById("preview");
 const $count = document.getElementById("count");
 
-let entries = []; // { tab, title, url } for every open tab
-let items = []; // filtered + ranked: { entry, score, titlePos, urlPos }
+let entries = []; // { tab, title, url, rank } for every open tab, by rank
+let items = []; // filtered + ordered: { entry, score, quality, titlePos, urlPos }
 let selected = 0;
 let currentTabId = null;
+let settings = DEFAULT_SETTINGS;
 const windowNumbers = new Map();
 
 document.body.classList.add(MODE);
@@ -23,10 +24,6 @@ function closePalette() {
   else window.close();
 }
 
-function displayUrl(url) {
-  return url.replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/$/, "");
-}
-
 function faviconUrl(pageUrl, size) {
   const url = new URL(chrome.runtime.getURL("/_favicon/"));
   url.searchParams.set("pageUrl", pageUrl);
@@ -34,58 +31,44 @@ function faviconUrl(pageUrl, size) {
   return url.href;
 }
 
-// Most recently used first, with the tab you're on last, so ⏎ on an empty
-// query jumps back to the previous tab.
-function recency(entry) {
-  return entry.tab.id === currentTabId ? -1 : entry.tab.lastAccessed ?? 0;
-}
-
 async function load() {
-  const [all, [active]] = await Promise.all([
+  const [all, [active], mru, loaded] = await Promise.all([
     chrome.tabs.query({}),
     chrome.tabs.query({ active: true, lastFocusedWindow: true }),
+    chrome.runtime.sendMessage({ type: "get-mru" }).catch(() => []),
+    loadSettings(),
   ]);
+  settings = loaded;
   currentTabId = active?.id ?? null;
   for (const tab of all) {
     if (!windowNumbers.has(tab.windowId)) windowNumbers.set(tab.windowId, windowNumbers.size + 1);
   }
+
+  // Most recently used first (falling back to lastAccessed for tabs the MRU
+  // list hasn't seen), with the tab you're on last, so ⏎ on an empty query
+  // jumps back to the previous tab.
+  const mruIndex = new Map((mru ?? []).map((id, i) => [id, i]));
+  const isCurrent = (tab) => (tab.id === currentTabId ? 1 : 0);
+  const mruPos = (tab) => mruIndex.get(tab.id) ?? mruIndex.size;
+
   entries = all
     .filter((tab) => !(tab.url || "").startsWith(SELF_PREFIX))
-    .map((tab) => {
-      const url = tab.url || tab.pendingUrl || "";
-      return { tab, title: tab.title || url, url: displayUrl(url) };
-    })
-    .sort((a, b) => recency(b) - recency(a));
+    .map(tabEntry)
+    .sort(
+      ({ tab: a }, { tab: b }) =>
+        isCurrent(a) - isCurrent(b) || mruPos(a) - mruPos(b) || (b.lastAccessed ?? 0) - (a.lastAccessed ?? 0),
+    );
+  entries.forEach((e, i) => (e.rank = i));
   update();
-}
-
-// Space-separated terms must all match, each against the title or URL.
-function scoreEntry(entry, terms) {
-  let score = 0;
-  const titlePos = new Set();
-  const urlPos = new Set();
-  for (const term of terms) {
-    const t = fuzzyMatch(term, entry.title);
-    const u = fuzzyMatch(term, entry.url);
-    if (!t && !u) return null;
-    if (t && (!u || t.score >= u.score)) {
-      score += t.score;
-      t.positions.forEach((p) => titlePos.add(p));
-    } else {
-      score += u.score;
-      u.positions.forEach((p) => urlPos.add(p));
-    }
-  }
-  return { entry, score, titlePos, urlPos };
 }
 
 function update() {
   const terms = $query.value.trim().split(/\s+/).filter(Boolean);
   if (terms.length === 0) {
-    items = entries.map((entry) => ({ entry, score: 0, titlePos: new Set(), urlPos: new Set() }));
+    items = entries.map((entry) => ({ entry, score: 0, quality: 1, titlePos: new Set(), urlPos: new Set() }));
   } else {
-    items = entries.map((e) => scoreEntry(e, terms)).filter(Boolean);
-    items.sort((a, b) => b.score - a.score || recency(b.entry) - recency(a.entry));
+    items = entries.map((e) => scoreEntry(e, terms, settings)).filter(Boolean);
+    if (settings.sortBy === "score") items.sort((a, b) => b.score - a.score || a.entry.rank - b.entry.rank);
   }
   selected = 0;
   render();
@@ -237,6 +220,11 @@ async function activateSelected() {
   closePalette();
 }
 
+function openSettings() {
+  chrome.runtime.openOptionsPage();
+  closePalette();
+}
+
 async function closeSelectedTab() {
   const item = items[selected];
   if (!item) return;
@@ -261,7 +249,8 @@ document.addEventListener("keydown", (e) => {
   else if (ctrl && e.key === "u") {
     $query.value = "";
     update();
-  } else handled = false;
+  } else if (ctrl && e.key === ",") openSettings();
+  else handled = false;
   if (handled) e.preventDefault();
 });
 
@@ -279,6 +268,7 @@ $results.addEventListener("click", (e) => {
 });
 
 document.getElementById("backdrop").addEventListener("mousedown", closePalette);
+document.getElementById("settings").addEventListener("click", openSettings);
 
 // Keep typing focus in the prompt no matter where you click.
 document.addEventListener("mousedown", (e) => {

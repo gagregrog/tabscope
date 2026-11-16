@@ -12,8 +12,17 @@
         <fieldset class="panel prompt">
           <legend>Find Tabs</legend>
           <span class="prefix">&gt;</span>
-          <input id="query" autocomplete="off" spellcheck="false" autofocus />
+          <input id="query" autocomplete="off" spellcheck="false" />
           <span id="count"></span>
+          <button id="settings" type="button" title="Settings (^,)" aria-label="Settings">
+            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+              <path
+                fill="currentColor"
+                fill-rule="evenodd"
+                d="M10.3 2h3.4l.5 2.6a8 8 0 0 1 1.9 1.1l2.5-.9 1.7 3-2 1.7a8 8 0 0 1 0 2.2l2 1.7-1.7 3-2.5-.9a8 8 0 0 1-1.9 1.1l-.5 2.6h-3.4l-.5-2.6a8 8 0 0 1-1.9-1.1l-2.5.9-1.7-3 2-1.7a8 8 0 0 1 0-2.2l-2-1.7 1.7-3 2.5.9a8 8 0 0 1 1.9-1.1zM12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"
+              />
+            </svg>
+          </button>
         </fieldset>
         <fieldset class="panel results">
           <legend>Results</legend>
@@ -24,10 +33,11 @@
         <legend>Preview</legend>
         <div id="preview"></div>
         <div class="hint">
-          ⏎ open · ↑↓ ^n/^p ^j/^k move · ^d close tab · ^u clear · esc quit
+          ⏎ open · ↑↓ ^n/^p ^j/^k move · ^d close tab · ^u clear · ^, settings · esc quit
         </div>
       </fieldset>
     </main>
+    <script src="settings.js"></script>
     <script src="fuzzy.js"></script>
     <script src="palette.js"></script>
   </body>

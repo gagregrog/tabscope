@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Tabscope settings</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <img src="icons/icon48.png" alt="" />
+        <h1>Tabscope</h1>
+        <span id="saved" aria-live="polite"></span>
+      </header>
+
+      <section>
+        <h2>Matching</h2>
+        <div class="field">
+          <label for="strictness">Strictness</label>
+          <div class="slider">
+            <span class="end">Loose</span>
+            <input type="range" id="strictness" min="0" max="100" step="5" />
+            <span class="end">Strict</span>
+            <output id="strictnessValue" for="strictness"></output>
+          </div>
+          <p class="help" id="strictnessHelp"></p>
+        </div>
+
+        <div class="field">
+          <label for="caseMode">Case</label>
+          <select id="caseMode">
+            <option value="smart">Smart: ignore case unless you type a capital</option>
+            <option value="ignore">Always ignore case</option>
+            <option value="respect">Always match case</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="check"><input type="checkbox" id="matchUrls" /> Match URLs as well as titles</label>
+        </div>
+
+        <div class="field">
+          <span class="label">While searching, order results by</span>
+          <label class="check"><input type="radio" name="sortBy" value="score" /> Best match</label>
+          <label class="check"><input type="radio" name="sortBy" value="recent" /> Most recently used</label>
+          <p class="help">With an empty search, tabs are always most recently used first.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Try it on your open tabs</h2>
+        <input id="tryQuery" type="text" placeholder="Type a search…" autocomplete="off" spellcheck="false" />
+        <p class="help" id="tryCount"></p>
+        <ol id="tryResults"></ol>
+      </section>
+
+      <section>
+        <h2>Shortcuts</h2>
+        <dl id="shortcuts"></dl>
+        <button id="editShortcuts" type="button">Change shortcuts…</button>
+      </section>
+    </main>
+    <script src="settings.js"></script>
+    <script src="fuzzy.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>

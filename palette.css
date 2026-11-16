@@ -105,6 +105,19 @@ legend {
 #count {
   color: var(--dim);
 }
+#settings {
+  display: flex;
+  padding: 2px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: var(--dim);
+  cursor: pointer;
+}
+#settings:hover {
+  color: var(--fg);
+  background: var(--bg-sel);
+}
 
 .results {
   flex: 1;
