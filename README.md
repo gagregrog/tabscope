@@ -53,3 +53,7 @@ The settings page has a live preview against your open tabs, showing each match'
 - On pages that extensions can't script (`brave://`, the new tab page, the Web Store, PDFs), the picker opens as the toolbar popup instead.
 - `background.js` keeps the most-recently-used tab list across all windows. It drives the finder's ordering, the swap and the walk.
 - `fuzzy.js` is an fzf-style scorer. It gives bonuses for matches at word boundaries, at camelCase humps and in consecutive runs, and penalties for gaps.
+
+## License
+
+[MIT](LICENSE)
