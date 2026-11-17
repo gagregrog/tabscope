@@ -23,6 +23,8 @@ let settings = DEFAULT_SETTINGS;
 const windowNumbers = new Map();
 
 document.body.classList.add(MODE);
+// Dev builds (./build.sh --dev) get a green outline.
+if (chrome.runtime.getManifest().name.endsWith(" (dev)")) document.body.classList.add("dev");
 
 function closePalette() {
   if (MODE === "overlay") parent.postMessage({ tabscope: "close" }, "*");

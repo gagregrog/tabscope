@@ -16,6 +16,10 @@ Fuzzy-find your open tabs by title or URL, in a telescope.nvim-style picker. Als
 2. Open `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on** and pick `tabscope.xpi`.
 3. Firefox keeps the add-on until it restarts. Change hotkeys at `about:addons` → gear menu → **Manage Extension Shortcuts**.
 
+Add `--dev` (`./build.sh firefox --dev`) to build `tabscope-dev.xpi`. It is named "Tabscope (dev)", and its finder has a green outline, so you can tell it apart from an installed release.
+
+`./build.sh chrome --dev` also writes `dist/chrome-dev/`. Load that folder with **Load unpacked**. After a change, rebuild and click **Reload** on the extensions page.
+
 The build takes `manifest.json`, applies the overrides in `firefox-manifest.json` (an event-page background and the Gecko add-on ID) and drops the `favicon` permission. Firefox has no favicon endpoint, so the picker shows the icon each tab reports. A permanent install needs a build signed through addons.mozilla.org.
 
 ## Hotkeys

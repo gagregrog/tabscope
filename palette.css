@@ -52,6 +52,10 @@ body.popup #backdrop {
   border-radius: 8px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
+body.dev #picker {
+  outline: 3px solid #3fb950;
+  outline-offset: -3px;
+}
 body.popup #picker {
   position: static;
   transform: none;
